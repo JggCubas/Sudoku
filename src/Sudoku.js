@@ -30,84 +30,71 @@ Bring to life your Sudoku.
 (...)
 
 */
-//5524976106
-
-
 function Celda(props){
-  const [state,setState] = useState({
-    isActive : false,
-    valor : ''
-  });
   const tecla = event => {
-    setState({valor : event.key,isActive : state.isActive});
+    props.capturaTecla(event.key);
   };
   return (
-    <div tabIndex={-1} onKeyDown = { tecla }  className={  `sudoku-cell ${ props.isActive ? 'selected' : '' }` }
+    <div tabIndex={-1} onKeyDown = { tecla }  className={  `sudoku-cell ${ props.value.isActive ? 'selected' : '' } ` }
       onClick={props.darclick}>
-      <div className="sudoku-number">
-        { state.valor }
+      <div className={ `sudoku-number ${ props.value.erroneo ? 'erroneo' : '' } ` }>
+        { props.value.valor }
       </div>
     </div>
   );
 }
-
-
-class Bloques extends React.Component{
-  constructor(props) {
-    super(props);
-  }
-  render(){
-    // const arreglo = [];
-    // // js
-    // for(let i = 1; i <= 9; i++){
-    //   arreglo.push(<Celda />);
-    // }
+function Bloques(props){
     return(
       <div className="sudoku-cell">
           <div className="sudoku-grid">
             {
-              this.props.celdas.map((x,index)=>{
-                return <Celda key={` cel_${index} `} row={this.props.row} cel={index} value={x} darclick={() => this.props.darclick(this.props.row,index)} />
+              props.celdas.map((x,index)=>{
+                return <Celda key={` cel_${index} `} bloq={props.bloq} celda={index} value={x} capturaTecla={(valortecla) => props.capturaTecla(props.bloq,index,valortecla)} darclick={() => props.darclick(props.bloq,index)} />
               })
             }
           </div>
         </div>
     );
+}
+function Malla(){
+  let sw = new Array(9);
+  for(let x = 0 ; x < 9 ;x++){
+    sw[x] = new Array(9);
+    for(let y = 0 ; y < 9 ;y++){
+      sw[x][y] = {isActive:false,valor:'',erroneo:false};
+    }
   }
-}
-
-class Malla extends React.Component{
-constructor(props) {
-  super(props);
-  this.state = {
-      arreglo: Array(9).fill({isActive:false,valor:''}).map(x => Array(9).fill({isActive:false,valor:''}))
-    };
-}
-eventoClick(row,cel){
-  let clon = this.state.arreglo.slice();
-  clon[0][0]['isActive'] = true;
-  // [row,cel].isA/ctive = true;
-  this.setState({
-    arreglo : clon
+  const [state,setState] = useState({
+    arreglo: sw
   });
-  // this.state.arreglo[row][cel].isActive = true;
-  console.log(clon);
-  console.log(this.state.arreglo);
-}
-render(){
-  // const arreglo = [];
-  // // js
-  // for(let i = 1; i <= 9; i++){
-  //   arreglo.push(<Bloques />);
-  // }
+  function eventoClick(bloq,cel){
+    let clon = state.arreglo.slice();
+    clon.map((x)=>{ x.map((y) => { y.isActive = false;}); });
+    clon[bloq][cel]['isActive'] = true;
+    setState({arreglo : clon});
+  }
+  function eventoTecla(bloq,cel,valortecla){
+    if(isNaN(valortecla)) return;
+    let clon = state.arreglo.slice();
+    if(valortecla == 0) {valortecla = ''};
+    clon[bloq][cel]['valor'] = valortecla;
+    let erroneo = false;
+    clon[bloq].map((x,index) => {
+      if(x.valor == valortecla && index != cel){
+        erroneo = true
+      }
+    });
+    clon[bloq][cel]['erroneo'] = erroneo;
+    setState({
+       arreglo : clon
+    });
+  }
   return(
     <div className="sudoku-grid">
-      {this.state.arreglo.map((x,index)=>{return <Bloques key={` row_${index} `} row={index} celdas={x} darclick={(row,cel)=> this.eventoClick(row,cel)} />})}
+      {state.arreglo.map((x,index)=>{return <Bloques key={` bloq_${index} `} bloq={index} celdas={x} capturaTecla={(bloq,cel,valortecla) => eventoTecla(bloq,cel,valortecla) } darclick={ (bloq,cel) => eventoClick(bloq,cel) } />})}
     </div>
   );
 }
-}
-
 function Sudoku(){
 
     return (<div className="container">
@@ -117,140 +104,141 @@ function Sudoku(){
     </div>);
 }
 
-function SudokuBackup(){
-
-    return (<div className="container">
-        <div className="sudoku" tabIndex="0">
-
-            <div className="sudoku-grid">
-                <div className="sudoku-cell">
-                    <div className="sudoku-grid">
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                    </div>
-                </div>
-
-                <div className="sudoku-cell">
-                    <div className="sudoku-grid">
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                    </div>
-                </div>
-
-                <div className="sudoku-cell">
-                    <div className="sudoku-grid">
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                    </div>
-                </div>
-
-                <div className="sudoku-cell">
-                    <div className="sudoku-grid">
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                    </div>
-                </div>
-
-                <div className="sudoku-cell">
-                    <div className="sudoku-grid">
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                    </div>
-                </div>
-
-                <div className="sudoku-cell">
-                    <div className="sudoku-grid">
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                    </div>
-                </div>
-
-                <div className="sudoku-cell">
-                    <div className="sudoku-grid">
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                    </div>
-                </div>
-
-                <div className="sudoku-cell">
-                    <div className="sudoku-grid">
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                    </div>
-                </div>
-
-                <div className="sudoku-cell">
-                    <div className="sudoku-grid">
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                        <div className="sudoku-cell"><div className="sudoku-number"></div></div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>);
-}
+// 
+// function SudokuBackup(){
+//
+//     return (<div className="container">
+//         <div className="sudoku" tabIndex="0">
+//
+//             <div className="sudoku-grid">
+//                 <div className="sudoku-cell">
+//                     <div className="sudoku-grid">
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                     </div>
+//                 </div>
+//
+//                 <div className="sudoku-cell">
+//                     <div className="sudoku-grid">
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                     </div>
+//                 </div>
+//
+//                 <div className="sudoku-cell">
+//                     <div className="sudoku-grid">
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                     </div>
+//                 </div>
+//
+//                 <div className="sudoku-cell">
+//                     <div className="sudoku-grid">
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                     </div>
+//                 </div>
+//
+//                 <div className="sudoku-cell">
+//                     <div className="sudoku-grid">
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                     </div>
+//                 </div>
+//
+//                 <div className="sudoku-cell">
+//                     <div className="sudoku-grid">
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                     </div>
+//                 </div>
+//
+//                 <div className="sudoku-cell">
+//                     <div className="sudoku-grid">
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                     </div>
+//                 </div>
+//
+//                 <div className="sudoku-cell">
+//                     <div className="sudoku-grid">
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                     </div>
+//                 </div>
+//
+//                 <div className="sudoku-cell">
+//                     <div className="sudoku-grid">
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                         <div className="sudoku-cell"><div className="sudoku-number"></div></div>
+//                     </div>
+//                 </div>
+//             </div>
+//         </div>
+//     </div>);
+// }
 
 export default Sudoku;

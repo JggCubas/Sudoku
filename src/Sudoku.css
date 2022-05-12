@@ -46,3 +46,7 @@
 .selected {
     background-color: rgba(111, 47, 142, 0.3) !important;
 }
+
+.erroneo{
+  color: red;
+}
